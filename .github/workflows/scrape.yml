@@ -34,10 +34,14 @@ jobs:
             const browser = await chromium.launch();
             const page = await browser.newPage();
 
-            await page.goto('https://makerworld.com/en/@Davson_Art', {
-             waitUntil: 'domcontentloaded'
+          await page.goto('https://makerworld.com/en/@Davson_Art', {
+  waitUntil: 'domcontentloaded',
+  timeout: 60000
+});
 
-            });
+// dajemy czas Reactowi na wyrenderowanie danych
+await page.waitForTimeout(5000);
+
 
             const stats = await page.evaluate(() => {
               const nums = Array.from(document.querySelectorAll('span'))
