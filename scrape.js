@@ -7,7 +7,7 @@ const URL = "https://makerworld.com/en/@Davson_Art";
   const browser = await chromium.launch();
   const page = await browser.newPage();
 
-  await page.goto(URL, { waitUntil: "networkidle", timeout: 60000 });
+  await page.goto(URL, { waitUntil: "domcontentloaded", timeout: 60000 });
 
   // czekamy aż pojawią się statystyki
   await page.waitForSelector("div", { timeout: 30000 });
@@ -38,3 +38,4 @@ const URL = "https://makerworld.com/en/@Davson_Art";
 
   await browser.close();
 })();
+
