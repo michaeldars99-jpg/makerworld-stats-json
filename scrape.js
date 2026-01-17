@@ -1,51 +1,40 @@
-import fetch from "node-fetch";
-import * as cheerio from "cheerio";
+import { chromium } from "playwright";
 import fs from "fs";
 
 const URL = "https://makerworld.com/en/@Davson_Art";
 
-async function run() {
-  const res = await fetch(URL, {
-    headers: {
-      "User-Agent": "Mozilla/5.0"
-    }
+(async () => {
+  const browser = await chromium.launch();
+  const page = await browser.newPage();
+
+  await page.goto(URL, { waitUntil: "networkidle", timeout: 60000 });
+
+  // czekamy aż pojawią się statystyki
+  await page.waitForSelector("div", { timeout: 30000 });
+
+  const stats = await page.evaluate(() => {
+    const text = document.body.innerText;
+
+    const getNumber = (regex) => {
+      const m = text.match(regex);
+      if (!m) return 0;
+      return m[1].includes("k")
+        ? Math.round(parseFloat(m[1]) * 1000)
+        : parseInt(m[1]);
+    };
+
+    return {
+      points: getNumber(/(\d{3,4})\s*points/i),
+      boosts: getNumber(/(\d+)\s*boost/i),
+      likes: getNumber(/(\d+)\s*like/i),
+      downloads: getNumber(/(\d+(\.\d+)?k?)\s*download/i),
+      views: getNumber(/(\d+)\s*view/i),
+      updated: new Date().toISOString()
+    };
   });
 
-  const html = await res.text();
-  const $ = cheerio.load(html);
+  fs.writeFileSync("stats.json", JSON.stringify(stats, null, 2));
+  console.log("Saved stats:", stats);
 
-  const numbers = [];
-
-  $("span").each((_, el) => {
-    const t = $(el).text().trim();
-    if (/^\d+(\.\d+)?k?$/.test(t)) {
-      numbers.push(t);
-    }
-  });
-
-  const boosts = parseInt(numbers[0] ?? "0");
-  const likes = parseInt(numbers[1] ?? "0");
-
-  const downloads = numbers[2]?.includes("k")
-    ? Math.round(parseFloat(numbers[2]) * 1000)
-    : parseInt(numbers[2] ?? "0");
-
-  const views = parseInt(numbers[3] ?? "0");
-
-  const pointsMatch = $("body").text().match(/\b\d{3,4}\b/);
-  const points = pointsMatch ? parseInt(pointsMatch[0]) : 0;
-
-  const data = {
-    points,
-    boosts,
-    likes,
-    downloads,
-    views,
-    updated: new Date().toISOString()
-  };
-
-  fs.writeFileSync("stats.json", JSON.stringify(data, null, 2));
-  console.log("Zapisano stats.json", data);
-}
-
-run();
+  await browser.close();
+})();
