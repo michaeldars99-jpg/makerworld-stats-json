@@ -1,21 +1,23 @@
-const { chromium } = require('playwright');
+import { chromium } from 'playwright';
+import fs from 'fs';
 
-(async () => {
-  const browser = await chromium.launch({ headless: true });
-  const page = await browser.newPage();
+const url = 'https://makerworld.com/en/@Davson_Art';
 
-  await page.setUserAgent(
-    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36'
-  );
+const browser = await chromium.launch({ headless: true });
+const page = await browser.newPage();
 
-  await page.goto('https://makerworld.com/en/@Davson_Art', {
-    waitUntil: 'domcontentloaded',
-    timeout: 60000
-  });
+await page.setUserAgent(
+  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36'
+);
 
-  await page.waitForTimeout(3000);
+await page.goto(url, {
+  waitUntil: 'domcontentloaded',
+  timeout: 60000
+});
 
-  // 👉 dopiero TU selektory
+await page.waitForTimeout(3000);
 
-  await browser.close();
-})();
+// ⬇️ tymczasowo (test)
+console.log('PAGE TITLE:', await page.title());
+
+await browser.close();
