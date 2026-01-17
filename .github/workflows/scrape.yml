@@ -1,0 +1,76 @@
+name: MakerWorld Scraper
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Playwright
+        run: |
+          npm init -y
+          npm install playwright
+          npx playwright install chromium
+
+      - name: Scrape MakerWorld
+        run: |
+          node <<'EOF'
+          const { chromium } = require('playwright');
+          const fs = require('fs');
+
+          (async () => {
+            const browser = await chromium.launch();
+            const page = await browser.newPage();
+
+            await page.goto('https://makerworld.com/en/@Davson_Art', {
+              waitUntil: 'networkidle'
+            });
+
+            const stats = await page.evaluate(() => {
+              const nums = Array.from(document.querySelectorAll('span'))
+                .map(e => e.innerText.trim())
+                .filter(t => /^\d+(\.\d+)?k?$/.test(t));
+
+              const toNum = v =>
+                v.includes('k')
+                  ? Math.round(parseFloat(v) * 1000)
+                  : parseInt(v);
+
+              return {
+                points: toNum(nums[0] || '0'),
+                boosts: toNum(nums[1] || '0'),
+                likes: toNum(nums[2] || '0'),
+                downloads: toNum(nums[3] || '0'),
+                views: toNum(nums[4] || '0'),
+                updated: new Date().toISOString()
+              };
+            });
+
+            fs.writeFileSync(
+              'stats.json',
+              JSON.stringify(stats, null, 2)
+            );
+
+            await browser.close();
+          })();
+          EOF
+
+      - name: Commit stats
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add stats.json
+          git commit -m "Update stats" || echo "No changes"
+          git push
