@@ -17,6 +17,9 @@ await page.goto(url, {
 });
 
 await page.waitForTimeout(3000);
+const nuxt = await page.evaluate(() => window.__NUXT__);
+console.log(JSON.stringify(nuxt).slice(0, 3000));
+
 
 // 🔎 TEST – potwierdzenie że strona się załadowała
 console.log('PAGE TITLE:', await page.title());
@@ -26,4 +29,5 @@ console.log(content.slice(0, 2000));
 
 
 await browser.close();
+
 
