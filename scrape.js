@@ -1,5 +1,4 @@
 import { chromium } from 'playwright';
-import fs from 'fs';
 
 const browser = await chromium.launch({ headless: true });
 
@@ -10,26 +9,28 @@ const context = await browser.newContext({
 
 const page = await context.newPage();
 
-// ⬇️ TU PRZECHWYTUJEMY KONKRETNY RESPONSE
-const profilePromise = page.waitForResponse(
-  (response) =>
-    response.url().includes('/user-service/user/profile') &&
-    response.status() === 200,
-  { timeout: 60000 }
-);
+// 🔍 logujemy WSZYSTKIE odpowiedzi JSON
+page.on('response', async (response) => {
+  const url = response.url();
+  const ct = response.headers()['content-type'] || '';
+
+  if (ct.includes('application/json')) {
+    try {
+      const json = await response.json();
+      console.log('JSON FROM:', url);
+      console.log(JSON.stringify(json, null, 2).slice(0, 2000));
+    } catch {
+      // ignorujemy
+    }
+  }
+});
 
 await page.goto('https://makerworld.com/en/@Davson_Art', {
   waitUntil: 'domcontentloaded',
   timeout: 60000
 });
 
-// ⬇️ Czekamy aż frontend pobierze profil
-const profileResponse = await profilePromise;
-const profileJson = await profileResponse.json();
-
-console.log('PROFILE JSON:', JSON.stringify(profileJson, null, 2));
-
-// ⬇️ (na razie tylko zapis surowy – za chwilę go sparsujemy)
-fs.writeFileSync('stats.json', JSON.stringify(profileJson, null, 2));
+// ⏳ DAJEMY STRONIE CZAS (Cloudflare + SPA)
+await page.waitForTimeout(15000);
 
 await browser.close();
