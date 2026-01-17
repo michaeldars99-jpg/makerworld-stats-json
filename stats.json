@@ -1,7 +1,7 @@
-{
-  "points": 0,
-  "likes": 0,
-  "downloads": 0,
-  "views": 0,
-  "updated": "2026-01-17T14:23:45.679Z"
-}
+[
+  "onappinstalled",
+  "oncontentvisibilityautostatechange",
+  "oncontextrestored",
+  "onpopstate",
+  "cookieStore"
+]
