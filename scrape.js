@@ -19,8 +19,7 @@ await page.goto('https://makerworld.com/en/@Davson_Art', {
 await page.waitForTimeout(8000);
 
 // 🔍 WYCIĄGAMY LICZBY Z UI
-const stats = await page.evaluate(() => {
-const stats = await page.evaluate(() => {
+const stats = await page.evaluate(async () => {
   const getStat = (label) => {
     const el = Array.from(document.querySelectorAll('*'))
       .find(e => e.textContent?.trim() === label);
@@ -29,9 +28,6 @@ const stats = await page.evaluate(() => {
 
     const container = el.closest('div');
     if (!container) return 0;
-
-    const numberEl = container.querySelector('*');
-    if (!numberEl) return 0;
 
     const match = container.textContent.match(/\d+/);
     return match ? parseInt(match[0], 10) : 0;
@@ -47,10 +43,12 @@ const stats = await page.evaluate(() => {
 });
 
 
+
 console.log('FINAL STATS:', stats);
 
 // 💾 ZAPIS DO PLIKU
 fs.writeFileSync('stats.json', JSON.stringify(stats, null, 2));
 
 await browser.close();
+
 
