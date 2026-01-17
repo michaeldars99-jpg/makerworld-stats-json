@@ -35,7 +35,8 @@ jobs:
             const page = await browser.newPage();
 
             await page.goto('https://makerworld.com/en/@Davson_Art', {
-              waitUntil: 'networkidle'
+             waitUntil: 'domcontentloaded'
+
             });
 
             const stats = await page.evaluate(() => {
