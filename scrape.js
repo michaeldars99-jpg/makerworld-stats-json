@@ -1,42 +1,21 @@
-import { chromium } from "playwright";
-import fs from "fs";
-
-const URL = "https://makerworld.com/en/@Davson_Art";
+const { chromium } = require('playwright');
 
 (async () => {
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
 
-  await page.goto(URL, { waitUntil: "domcontentloaded", timeout: 60000 });
+  await page.setUserAgent(
+    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36'
+  );
 
-  // czekamy aż pojawią się statystyki
-  await page.waitForSelector("div", { timeout: 30000 });
-
-  const stats = await page.evaluate(() => {
-    const text = document.body.innerText;
-
-    const getNumber = (regex) => {
-      const m = text.match(regex);
-      if (!m) return 0;
-      return m[1].includes("k")
-        ? Math.round(parseFloat(m[1]) * 1000)
-        : parseInt(m[1]);
-    };
-
-    return {
-      points: getNumber(/(\d{3,4})\s*points/i),
-      boosts: getNumber(/(\d+)\s*boost/i),
-      likes: getNumber(/(\d+)\s*like/i),
-      downloads: getNumber(/(\d+(\.\d+)?k?)\s*download/i),
-      views: getNumber(/(\d+)\s*view/i),
-      updated: new Date().toISOString()
-    };
+  await page.goto('https://makerworld.com/en/@Davson_Art', {
+    waitUntil: 'domcontentloaded',
+    timeout: 60000
   });
 
-  fs.writeFileSync("stats.json", JSON.stringify(stats, null, 2));
-  console.log("Saved stats:", stats);
   await page.waitForTimeout(3000);
+
+  // 👉 dopiero TU selektory
+
   await browser.close();
 })();
-
-
