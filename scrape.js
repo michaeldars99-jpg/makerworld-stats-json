@@ -21,4 +21,9 @@ await page.waitForTimeout(3000);
 // 🔎 TEST – potwierdzenie że strona się załadowała
 console.log('PAGE TITLE:', await page.title());
 
+const content = await page.content();
+console.log(content.slice(0, 2000));
+
+
 await browser.close();
+
