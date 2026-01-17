@@ -19,28 +19,21 @@ await page.goto('https://makerworld.com/en/@Davson_Art', {
 await page.waitForTimeout(8000);
 
 // 🔍 WYCIĄGAMY LICZBY Z UI
-const stats = await page.evaluate(async () => {
-  const getStat = (label) => {
-    const el = Array.from(document.querySelectorAll('*'))
-      .find(e => e.textContent?.trim() === label);
+const stats = await page.evaluate(() => {
+  const candidates = Object.entries(window)
+    .filter(([key]) =>
+      key.toLowerCase().includes('state') ||
+      key.toLowerCase().includes('store') ||
+      key.toLowerCase().includes('nuxt') ||
+      key.toLowerCase().includes('app')
+    )
+    .map(([key, value]) => ({ key, value }));
 
-    if (!el) return 0;
-
-    const container = el.closest('div');
-    if (!container) return 0;
-
-    const match = container.textContent.match(/\d+/);
-    return match ? parseInt(match[0], 10) : 0;
-  };
-
-  return {
-    points: getStat('Points'),
-    likes: getStat('Likes'),
-    downloads: getStat('Downloads'),
-    views: getStat('Views'),
-    updated: new Date().toISOString()
-  };
+  return candidates.map(c => c.key);
 });
+
+console.log('WINDOW STATE KEYS:', stats);
+
 
 
 
@@ -50,5 +43,6 @@ console.log('FINAL STATS:', stats);
 fs.writeFileSync('stats.json', JSON.stringify(stats, null, 2));
 
 await browser.close();
+
 
 
