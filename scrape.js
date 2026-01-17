@@ -1,14 +1,15 @@
 import { chromium } from 'playwright';
-import fs from 'fs';
 
 const url = 'https://makerworld.com/en/@Davson_Art';
 
 const browser = await chromium.launch({ headless: true });
-const page = await browser.newPage();
 
-await page.setUserAgent(
-  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36'
-);
+const context = await browser.newContext({
+  userAgent:
+    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36'
+});
+
+const page = await context.newPage();
 
 await page.goto(url, {
   waitUntil: 'domcontentloaded',
@@ -17,7 +18,7 @@ await page.goto(url, {
 
 await page.waitForTimeout(3000);
 
-// ⬇️ tymczasowo (test)
+// 🔎 TEST – potwierdzenie że strona się załadowała
 console.log('PAGE TITLE:', await page.title());
 
 await browser.close();
