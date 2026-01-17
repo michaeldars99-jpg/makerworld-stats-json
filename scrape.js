@@ -10,16 +10,7 @@ const context = await browser.newContext({
 });
 
 const page = await context.newPage();
-page.on('response', async (response) => {
-  const url = response.url();
-  if (url.includes('api') || url.includes('graphql')) {
-    try {
-      const text = await response.text();
-      console.log('API RESPONSE FROM:', url);
-      console.log(text.slice(0, 1000));
-    } catch {}
-  }
-});
+
 
 
 await page.goto(url, {
@@ -28,6 +19,15 @@ await page.goto(url, {
 });
 
 await page.waitForTimeout(3000);
+const stats = await page.evaluate(async () => {
+  const res = await fetch(
+    'https://makerworld.com/api/v1/user-service/user/profile?username=Davson_Art'
+  );
+  return await res.json();
+});
+
+console.log('RAW STATS:', JSON.stringify(stats, null, 2));
+
 
 
 
@@ -39,6 +39,7 @@ console.log(content.slice(0, 2000));
 
 
 await browser.close();
+
 
 
 
