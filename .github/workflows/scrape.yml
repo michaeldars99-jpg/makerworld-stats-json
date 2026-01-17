@@ -3,7 +3,7 @@ name: MakerWorld Scraper
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "0 */6 * * *"
 
 jobs:
   scrape:
@@ -21,8 +21,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
       - name: Run scraper
-        run: npm run scrape
+        run: node scrape.js
 
       - name: Commit stats
         run: |
