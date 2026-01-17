@@ -35,7 +35,8 @@ const URL = "https://makerworld.com/en/@Davson_Art";
 
   fs.writeFileSync("stats.json", JSON.stringify(stats, null, 2));
   console.log("Saved stats:", stats);
-
+  await page.waitForTimeout(3000);
   await browser.close();
 })();
+
 
