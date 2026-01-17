@@ -1,4 +1,5 @@
 import { chromium } from 'playwright';
+import fs from 'fs';
 
 const browser = await chromium.launch({ headless: true });
 
@@ -9,28 +10,34 @@ const context = await browser.newContext({
 
 const page = await context.newPage();
 
-// 🔍 logujemy WSZYSTKIE odpowiedzi JSON
-page.on('response', async (response) => {
-  const url = response.url();
-  const ct = response.headers()['content-type'] || '';
-
-  if (ct.includes('application/json')) {
-    try {
-      const json = await response.json();
-      console.log('JSON FROM:', url);
-      console.log(JSON.stringify(json, null, 2).slice(0, 2000));
-    } catch {
-      // ignorujemy
-    }
-  }
-});
-
 await page.goto('https://makerworld.com/en/@Davson_Art', {
   waitUntil: 'domcontentloaded',
   timeout: 60000
 });
 
-// ⏳ DAJEMY STRONIE CZAS (Cloudflare + SPA)
-await page.waitForTimeout(15000);
+// ⏳ DAJEMY STRONIE CZAS NA DYNAMICZNE RENDEROWANIE
+await page.waitForTimeout(8000);
 
-await browser.close();
+// 🔍 WYCIĄGAMY LICZBY Z UI
+const stats = await page.evaluate(() => {
+  const getNumber = (label) => {
+    const el = Array.from(document.querySelectorAll('div'))
+      .find(d => d.textContent?.trim() === label);
+    if (!el) return 0;
+    const valueEl = el.previousElementSibling;
+    return valueEl ? parseInt(valueEl.textContent.replace(/\D/g, ''), 10) : 0;
+  };
+
+  return {
+    points: getNumber('Points'),
+    likes: getNumber('Likes'),
+    downloads: getNumber('Downloads'),
+    views: getNumber('Views'),
+    updated: new Date().toISOString()
+  };
+});
+
+console.log('FINAL STATS:', stats);
+
+// 💾 ZAPIS DO PLIKU
+fs.writeFileSync('stats.json', JSON.stringify(s
