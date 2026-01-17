@@ -1,0 +1,14 @@
+{
+  "name": "makerworld-stats",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "scrape": "node api/stats.js"
+  },
+  "dependencies": {
+    "playwright": "^1.41.0",
+    "cheerio": "^1.0.0-rc.12",
+    "node-fetch": "^3.3.2"
+  }
+}
