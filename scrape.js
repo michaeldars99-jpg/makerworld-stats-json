@@ -20,22 +20,32 @@ await page.waitForTimeout(8000);
 
 // 🔍 WYCIĄGAMY LICZBY Z UI
 const stats = await page.evaluate(() => {
-  const getNumber = (label) => {
-    const el = Array.from(document.querySelectorAll('div'))
-      .find(d => d.textContent?.trim() === label);
+const stats = await page.evaluate(() => {
+  const getStat = (label) => {
+    const el = Array.from(document.querySelectorAll('*'))
+      .find(e => e.textContent?.trim() === label);
+
     if (!el) return 0;
-    const valueEl = el.previousElementSibling;
-    return valueEl ? parseInt(valueEl.textContent.replace(/\D/g, ''), 10) : 0;
+
+    const container = el.closest('div');
+    if (!container) return 0;
+
+    const numberEl = container.querySelector('*');
+    if (!numberEl) return 0;
+
+    const match = container.textContent.match(/\d+/);
+    return match ? parseInt(match[0], 10) : 0;
   };
 
   return {
-    points: getNumber('Points'),
-    likes: getNumber('Likes'),
-    downloads: getNumber('Downloads'),
-    views: getNumber('Views'),
+    points: getStat('Points'),
+    likes: getStat('Likes'),
+    downloads: getStat('Downloads'),
+    views: getStat('Views'),
     updated: new Date().toISOString()
   };
 });
+
 
 console.log('FINAL STATS:', stats);
 
@@ -43,3 +53,4 @@ console.log('FINAL STATS:', stats);
 fs.writeFileSync('stats.json', JSON.stringify(stats, null, 2));
 
 await browser.close();
+
