@@ -1,4 +1,9 @@
 name: MakerWorld Scraper
+- name: Install dependencies
+  run: |
+    npm install
+    npx playwright install chromium
+
 
 on:
   schedule:
