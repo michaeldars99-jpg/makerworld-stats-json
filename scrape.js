@@ -40,4 +40,6 @@ const stats = await page.evaluate(() => {
 console.log('FINAL STATS:', stats);
 
 // 💾 ZAPIS DO PLIKU
-fs.writeFileSync('stats.json', JSON.stringify(s
+fs.writeFileSync('stats.json', JSON.stringify(stats, null, 2));
+
+await browser.close();
